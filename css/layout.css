@@ -1,0 +1,145 @@
+/* ═══════════════════════════════════════════
+   Pastelette — Layout
+   ═══════════════════════════════════════════ */
+
+/* ─── Main Frame ─── */
+.main-frame {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 780px;
+  padding: 52px 52px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  border: 1px solid var(--border-frame);
+  border-radius: 3px;
+}
+
+/* inner double line */
+.main-frame::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 0.5px solid var(--border-frame-inner);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* ─── Corner Ornaments ─── */
+.corner-ornament {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+.corner-ornament::before,
+.corner-ornament::after {
+  content: '';
+  position: absolute;
+  background: var(--border-frame);
+}
+.corner-ornament::before { width: 100%; height: 1px; top: 0; left: 0; }
+.corner-ornament::after  { width: 1px; height: 100%; top: 0; left: 0; }
+.corner-ornament--tl { top: -1px;    left: -1px; }
+.corner-ornament--tr { top: -1px;    right: -1px;  transform: rotate(90deg); }
+.corner-ornament--bl { bottom: -1px; left: -1px;   transform: rotate(-90deg); }
+.corner-ornament--br { bottom: -1px; right: -1px;  transform: rotate(180deg); }
+
+/* ─── Header ─── */
+.site-header {
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-style: italic;
+  font-size: var(--fs-display);
+  letter-spacing: var(--ls-display);
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.site-tagline {
+  font-family: 'Jost', sans-serif;
+  font-size: var(--fs-label);
+  font-weight: 200;
+  color: var(--text-muted);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* ─── Settings button (top-right of header) ─── */
+.settings-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border-card);
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(4px);
+}
+.settings-btn:hover {
+  border-color: var(--border-input-focus);
+  color: var(--text-primary);
+  background: rgba(168, 164, 212, 0.12);
+  transform: rotate(50deg);
+}
+
+/* ─── AI status badge ─── */
+.ai-badge {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-top: 2px;
+  transition: all var(--transition-slow);
+}
+.ai-badge--free {
+  background: rgba(100, 180, 140, 0.12);
+  color: rgba(60, 150, 100, 0.85);
+  border: 1px solid rgba(100, 180, 140, 0.28);
+}
+.ai-badge--user {
+  background: rgba(168, 164, 212, 0.14);
+  color: var(--accent-primary);
+  border: 1px solid rgba(168, 164, 212, 0.30);
+}
+.ai-badge--algo {
+  background: rgba(175, 170, 215, 0.10);
+  color: var(--text-muted);
+  border: 1px solid var(--border-card);
+}
+
+/* ─── Result Section ─── */
+.result-section {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--transition-slow), transform var(--transition-spring);
+}
+.result-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .main-frame { padding: 30px 22px 38px; gap: 30px; }
+  .site-title { font-size: clamp(2rem, 10vw, 3rem); }
+}

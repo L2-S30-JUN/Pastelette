@@ -1,0 +1,128 @@
+/* ═══════════════════════════════════════════
+   Pastelette — Search & Tag Pills
+   ═══════════════════════════════════════════ */
+
+/* ─── Search Section ─── */
+.search-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ─── Search Input ─── */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-inner {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-pill);
+  padding: 0 8px 0 26px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.search-inner:focus-within {
+  border-color: var(--border-input-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.word-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+  font-size: var(--fs-input);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-primary);
+  padding: 15px 0;
+  letter-spacing: 0.06em;
+  min-width: 0;
+}
+
+.word-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-btn {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border-input);
+  background: rgba(168, 164, 212, 0.12);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.search-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+  transform: scale(1.06);
+}
+
+.search-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── Suggestion Tags ─── */
+.suggestion-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: center;
+  max-width: 540px;
+}
+
+.tag-pill {
+  font-family: 'Jost', 'Noto Sans KR', sans-serif;
+  font-size: var(--fs-tag);
+  font-weight: 300;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.38);
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 5px 13px;
+  letter-spacing: var(--ls-ui);
+  transition:
+    background var(--transition-base),
+    border-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.tag-pill:hover {
+  background: rgba(168, 164, 212, 0.15);
+  border-color: var(--border-input-focus);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.tag-pill.active {
+  background: rgba(168, 164, 212, 0.20);
+  border-color: var(--accent-primary);
+  color: var(--text-label);
+}
+
+@media (max-width: 600px) {
+  .search-wrapper { max-width: 100%; }
+}

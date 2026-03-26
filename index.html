@@ -3,501 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Word Palette — 단어가 색채로</title>
+  <meta name="description" content="Pastelette — 단어 하나가 색채 세계로 번역되는 순간. AI가 단어의 의미를 분석해 어울리는 색 팔레트를 추천합니다.">
+  <title>Pastelette — 단어가 색채로</title>
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
-  <style>
-    /* ─── CSS Variables ─── */
-    :root {
-      --bg-frosted:         rgba(255, 255, 255, 0.45);
-      --bg-frosted-border:  rgba(255, 255, 255, 0.70);
-      --text-primary:       #7B78A8;
-      --text-secondary:     #9D9BBF;
-      --text-muted:         #B8B5D0;
-      --text-watermark:     rgba(180, 176, 210, 0.18);
-      --text-label:         #6B6898;
-      --border-frame:       rgba(180, 175, 215, 0.50);
-      --border-frame-inner: rgba(200, 196, 230, 0.30);
-      --border-card:        rgba(210, 206, 235, 0.40);
-      --border-input:       rgba(180, 175, 215, 0.60);
-      --border-input-focus: rgba(150, 145, 200, 0.80);
-      --deco-snowflake:     rgba(160, 155, 205, 0.55);
-      --deco-sparkle:       rgba(170, 165, 215, 0.65);
-      --deco-dot:           rgba(175, 170, 215, 0.25);
-      --deco-cross:         rgba(175, 170, 215, 0.45);
-      --accent-primary:     #A8A4D4;
-      --accent-hover:       #8F8BC0;
-      --accent-glow:        rgba(168, 164, 212, 0.30);
-      --fs-display:   clamp(2.5rem, 6vw, 4.5rem);
-      --fs-watermark: clamp(8rem, 20vw, 18rem);
-      --fs-label:     0.75rem;
-      --fs-input:     1rem;
-      --ls-display:   0.25em;
-      --ls-label:     0.12em;
-    }
 
-    /* ─── Reset ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Noto Sans KR', -apple-system, sans-serif;
-      font-weight: 300;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    button { background: none; border: none; cursor: pointer; font: inherit; }
-    input  { font: inherit; }
-
-    /* ─── Body / Background ─── */
-    body.page-root {
-      min-height: 100vh;
-      background:
-        radial-gradient(ellipse at 70% 20%, rgba(200, 195, 240, 0.25) 0%, transparent 60%),
-        radial-gradient(ellipse at 20% 80%, rgba(200, 220, 245, 0.20) 0%, transparent 55%),
-        linear-gradient(135deg, #FDFCF8 0%, #F0EDF8 30%, #E8EEF8 60%, #DDE8F5 100%);
-      background-attachment: fixed;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      overflow-x: hidden;
-      animation: page-fade-in 1.2s ease forwards;
-    }
-
-    /* ─── Background Layer ─── */
-    .bg-layer {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .bg-watermark {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: var(--fs-watermark);
-      font-weight: 300;
-      letter-spacing: 0.3em;
-      color: var(--text-watermark);
-      pointer-events: none;
-      user-select: none;
-      white-space: nowrap;
-      overflow: hidden;
-      z-index: 0;
-      transition: opacity 0.4s ease;
-    }
-
-    /* ─── Ribbon Lines ─── */
-    .deco-ribbon {
-      position: absolute;
-      width: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .deco-ribbon--blue { top: 0;    left: 0; height: 50%; }
-    .deco-ribbon--pink { bottom: 0; left: 0; height: 50%; }
-    .ribbon-path {
-      stroke-dasharray: 2000;
-      stroke-dashoffset: 2000;
-      animation: ribbon-draw 3s ease-out forwards;
-    }
-    .deco-ribbon--blue .ribbon-path { animation-delay: 0.5s; }
-    .deco-ribbon--pink .ribbon-path { animation-delay: 1.0s; }
-
-    /* ─── Snowflakes ─── */
-    .deco-snowflake {
-      color: var(--deco-snowflake);
-      position: absolute;
-      pointer-events: none;
-      user-select: none;
-      animation: snowflake-float 8s ease-in-out infinite;
-      will-change: transform;
-      z-index: 2;
-    }
-    .deco-snowflake--sm { width: 24px; height: 24px; }
-    .deco-snowflake--md { width: 40px; height: 40px; }
-    .deco-snowflake--lg { width: 56px; height: 56px; }
-
-    /* ─── Sparkles ─── */
-    .deco-sparkle {
-      color: var(--deco-sparkle);
-      position: absolute;
-      pointer-events: none;
-      animation: sparkle-twinkle 4s ease-in-out infinite;
-      will-change: transform, opacity;
-      z-index: 3;
-      display: inline-block;
-    }
-    .deco-sparkle--xs { width: 8px;  height: 8px;  }
-    .deco-sparkle--sm { width: 14px; height: 14px; }
-    .deco-sparkle--md { width: 20px; height: 20px; }
-    .deco-sparkle--lg { width: 28px; height: 28px; }
-
-    /* ─── Main Frame ─── */
-    .main-frame {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 760px;
-      padding: 48px 48px 56px;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-      border: 1px solid var(--border-frame);
-      border-radius: 2px;
-    }
-    .main-frame::before {
-      content: '';
-      position: absolute;
-      inset: 6px;
-      border: 0.5px solid var(--border-frame-inner);
-      border-radius: 1px;
-      pointer-events: none;
-    }
-
-    /* ─── Corner Ornaments ─── */
-    .corner-ornament {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      pointer-events: none;
-    }
-    .corner-ornament::before,
-    .corner-ornament::after {
-      content: '';
-      position: absolute;
-      background: var(--border-frame);
-    }
-    .corner-ornament::before { width: 100%; height: 1px; top: 0; left: 0; }
-    .corner-ornament::after  { width: 1px; height: 100%; top: 0; left: 0; }
-    .corner-ornament--tl { top: -1px;    left: -1px; }
-    .corner-ornament--tr { top: -1px;    right: -1px;  transform: rotate(90deg); }
-    .corner-ornament--bl { bottom: -1px; left: -1px;   transform: rotate(-90deg); }
-    .corner-ornament--br { bottom: -1px; right: -1px;  transform: rotate(180deg); }
-
-    /* ─── Header ─── */
-    .site-header { text-align: center; }
-    .site-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      font-size: var(--fs-display);
-      letter-spacing: var(--ls-display);
-      color: var(--text-primary);
-      font-style: italic;
-    }
-    .site-tagline {
-      font-family: 'Noto Serif KR', serif;
-      font-size: var(--fs-label);
-      font-weight: 300;
-      color: var(--text-muted);
-      letter-spacing: 0.15em;
-      margin-top: 8px;
-    }
-
-    /* ─── Search ─── */
-    .search-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-    }
-    .search-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 480px;
-    }
-    .search-inner {
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.55);
-      border: 1px solid var(--border-input);
-      border-radius: 40px;
-      padding: 0 8px 0 24px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .search-inner:focus-within {
-      border-color: var(--border-input-focus);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-    .word-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
-      font-size: var(--fs-input);
-      font-weight: 300;
-      color: var(--text-primary);
-      padding: 14px 0;
-      letter-spacing: 0.05em;
-    }
-    .word-input::placeholder {
-      color: var(--text-muted);
-      font-style: italic;
-    }
-    .search-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid var(--border-input);
-      background: rgba(168, 164, 212, 0.15);
-      color: var(--accent-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-    .search-btn:hover {
-      background: var(--accent-primary);
-      color: white;
-      border-color: var(--accent-primary);
-      transform: scale(1.05);
-    }
-
-    /* ─── Tag Pills ─── */
-    .suggestion-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-    }
-    .tag-pill {
-      font-family: 'Jost', 'Noto Sans KR', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 300;
-      color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.4);
-      border: 1px solid var(--border-card);
-      border-radius: 20px;
-      padding: 6px 14px;
-      cursor: pointer;
-      letter-spacing: 0.05em;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(4px);
-    }
-    .tag-pill:hover {
-      background: rgba(168, 164, 212, 0.15);
-      border-color: var(--border-input-focus);
-      color: var(--text-primary);
-      transform: translateY(-1px);
-    }
-
-    /* ─── Result Section ─── */
-    .result-section {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    .result-section.visible { opacity: 1; }
-
-    /* ─── Palette Card ─── */
-    .palette-card {
-      background: var(--bg-frosted);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      border: 1px solid var(--border-card);
-      border-radius: 16px;
-      padding: 32px;
-      position: relative;
-      overflow: hidden;
-    }
-    .palette-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(circle, var(--deco-dot) 1px, transparent 1px);
-      background-size: 18px 18px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .palette-card__header {
-      position: relative;
-      z-index: 1;
-      margin-bottom: 28px;
-      text-align: center;
-    }
-    .palette-keyword {
-      display: block;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 400;
-      font-style: italic;
-      color: var(--text-primary);
-      letter-spacing: 0.2em;
-      text-transform: lowercase;
-    }
-    .palette-subtitle {
-      font-family: 'Jost', sans-serif;
-      font-size: var(--fs-label);
-      font-weight: 200;
-      color: var(--text-muted);
-      letter-spacing: var(--ls-label);
-      text-transform: uppercase;
-    }
-
-    /* ─── Color Swatches ─── */
-    .color-swatches {
-      display: flex;
-      gap: 12px;
-      position: relative;
-      z-index: 1;
-    }
-    .color-swatch {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      opacity: 0;
-      animation: swatch-slide-up 0.5s ease forwards;
-    }
-    .color-swatch:hover { transform: translateY(-4px); }
-    .color-swatch:nth-child(1) { animation-delay: 0.1s; }
-    .color-swatch:nth-child(2) { animation-delay: 0.2s; }
-    .color-swatch:nth-child(3) { animation-delay: 0.3s; }
-    .color-swatch:nth-child(4) { animation-delay: 0.4s; }
-    .color-swatch:nth-child(5) { animation-delay: 0.5s; }
-    .color-swatch:nth-child(6) { animation-delay: 0.6s; }
-    .swatch-bar {
-      height: 80px;
-      border-radius: 8px;
-      background-color: var(--swatch-color);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      box-shadow:
-        0 4px 16px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      transition: box-shadow 0.2s ease;
-    }
-    .color-swatch:hover .swatch-bar {
-      box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-    .swatch-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      text-align: center;
-    }
-    .swatch-name {
-      font-family: 'Jost', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 300;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-    }
-    .swatch-name-ko {
-      font-family: 'Noto Sans KR', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 300;
-      color: var(--text-muted);
-    }
-    .hex-code {
-      font-family: 'Jost', monospace;
-      font-size: 0.65rem;
-      font-weight: 200;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-      cursor: copy;
-      transition: color 0.2s ease;
-    }
-    .hex-code:hover { color: var(--text-label); }
-    .hex-code.copied::after {
-      content: ' ✓';
-      color: var(--accent-primary);
-    }
-
-    /* ─── Empty State ─── */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      opacity: 0.7;
-    }
-    .empty-state__text {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-weight: 300;
-      color: var(--text-muted);
-      font-size: 1rem;
-      letter-spacing: 0.1em;
-    }
-
-    /* ─── Animations ─── */
-    @keyframes page-fade-in {
-      0%   { opacity: 0; }
-      100% { opacity: 1; }
-    }
-    @keyframes snowflake-float {
-      0%, 100% { transform: translateY(0px)  rotate(0deg);   opacity: 0.55; }
-      33%       { transform: translateY(-8px) rotate(15deg);  opacity: 0.70; }
-      66%       { transform: translateY(4px)  rotate(-10deg); opacity: 0.45; }
-    }
-    @keyframes sparkle-twinkle {
-      0%, 100% { transform: scale(1)   rotate(0deg);   opacity: 0.65; }
-      25%       { transform: scale(1.3) rotate(45deg);  opacity: 1;    }
-      50%       { transform: scale(0.8) rotate(90deg);  opacity: 0.4;  }
-      75%       { transform: scale(1.1) rotate(135deg); opacity: 0.8;  }
-    }
-    @keyframes card-reveal {
-      0%   { opacity: 0; transform: translateY(20px) scale(0.97); }
-      100% { opacity: 1; transform: translateY(0)    scale(1);    }
-    }
-    @keyframes swatch-slide-up {
-      0%   { opacity: 0; transform: translateY(16px); }
-      100% { opacity: 1; transform: translateY(0);    }
-    }
-    @keyframes ribbon-draw {
-      0%   { stroke-dashoffset: 2000; opacity: 0;   }
-      100% { stroke-dashoffset: 0;    opacity: 0.5; }
-    }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 600px) {
-      .main-frame {
-        padding: 28px 20px 36px;
-        gap: 28px;
-      }
-      .color-swatches {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .color-swatch {
-        flex: 0 0 calc(33.33% - 7px);
-      }
-      .palette-card { padding: 20px; }
-      .deco-snowflake:nth-child(n+3) { display: none; }
-    }
-  </style>
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/decorations.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/palette.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/animations.css">
 </head>
 <body class="page-root">
 
-  <!-- ─── Background Layer ─── -->
+  <!-- ════════════════════════════════════════
+       BACKGROUND LAYER
+  ════════════════════════════════════════ -->
   <div class="bg-layer" aria-hidden="true">
-    <div class="bg-watermark" id="bgWatermark">PALETTE</div>
 
-    <!-- Ribbon lines -->
-    <svg class="deco-ribbon deco-ribbon--blue" viewBox="0 0 1200 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path class="ribbon-path" d="M -50 80 C 200 60, 400 200, 600 180 C 800 160, 1000 80, 1250 120"
-            stroke="rgba(140,170,220,0.50)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <!-- Watermark text -->
+    <div class="bg-watermark" id="bgWatermark">PASTELETTE</div>
+
+    <!-- Ribbon curves -->
+    <svg class="deco-ribbon deco-ribbon--blue"
+         viewBox="0 0 1200 400" preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path class="ribbon-path"
+            d="M -50 80 C 200 60, 400 200, 600 180 C 800 160, 1000 80, 1250 120"
+            stroke="rgba(140,170,220,0.48)" stroke-width="1.2"
+            fill="none" stroke-linecap="round"/>
     </svg>
-    <svg class="deco-ribbon deco-ribbon--pink" viewBox="0 0 1200 300" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path class="ribbon-path" d="M -50 250 C 200 270, 500 150, 700 200 C 900 250, 1100 180, 1250 220"
-            stroke="rgba(230,160,160,0.40)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    <svg class="deco-ribbon deco-ribbon--pink"
+         viewBox="0 0 1200 300" preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
+      <path class="ribbon-path"
+            d="M -50 250 C 200 270, 500 150, 700 200 C 900 250, 1100 180, 1250 220"
+            stroke="rgba(230,160,160,0.38)" stroke-width="1.2"
+            fill="none" stroke-linecap="round"/>
     </svg>
 
     <!-- Snowflakes -->
-    <svg class="deco-snowflake deco-snowflake--lg" style="top:8%;left:6%;animation-delay:0s"
-         width="56" height="56" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg class="deco-snowflake deco-snowflake--lg"
+         style="top:8%;left:6%;animation-delay:0s"
+         width="54" height="54" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1="2"  x2="20" y2="38" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="11" x2="38" y2="29" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="29" x2="38" y2="11" stroke="currentColor" stroke-width="1"/>
@@ -515,8 +70,10 @@
       <line x1="32" y1="26" x2="30" y2="21" stroke="currentColor" stroke-width="0.8"/>
       <circle cx="20" cy="20" r="2.5" stroke="currentColor" stroke-width="0.8"/>
     </svg>
-    <svg class="deco-snowflake deco-snowflake--md" style="top:65%;left:4%;animation-delay:-3s"
-         width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+    <svg class="deco-snowflake deco-snowflake--md"
+         style="top:66%;left:4%;animation-delay:-3.2s"
+         width="38" height="38" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1="2"  x2="20" y2="38" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="11" x2="38" y2="29" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="29" x2="38" y2="11" stroke="currentColor" stroke-width="1"/>
@@ -526,15 +83,19 @@
       <line x1="20" y1="32" x2="25" y2="27" stroke="currentColor" stroke-width="0.8"/>
       <circle cx="20" cy="20" r="2.5" stroke="currentColor" stroke-width="0.8"/>
     </svg>
-    <svg class="deco-snowflake deco-snowflake--sm" style="top:15%;right:8%;animation-delay:-1.5s"
-         width="24" height="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+    <svg class="deco-snowflake deco-snowflake--sm"
+         style="top:14%;right:8%;animation-delay:-1.6s"
+         width="22" height="22" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1="2"  x2="20" y2="38" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="11" x2="38" y2="29" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="29" x2="38" y2="11" stroke="currentColor" stroke-width="1"/>
       <circle cx="20" cy="20" r="2.5" stroke="currentColor" stroke-width="0.8"/>
     </svg>
-    <svg class="deco-snowflake deco-snowflake--md" style="top:72%;right:5%;animation-delay:-5s"
-         width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+    <svg class="deco-snowflake deco-snowflake--md"
+         style="top:73%;right:5%;animation-delay:-5.2s"
+         width="38" height="38" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
       <line x1="20" y1="2"  x2="20" y2="38" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="11" x2="38" y2="29" stroke="currentColor" stroke-width="1"/>
       <line x1="2"  y1="29" x2="38" y2="11" stroke="currentColor" stroke-width="1"/>
@@ -544,71 +105,140 @@
     </svg>
 
     <!-- Sparkles -->
-    <svg class="deco-sparkle deco-sparkle--md" style="top:20%;left:20%;animation-delay:0s"
-         width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+    <svg class="deco-sparkle deco-sparkle--md" style="top:20%;left:19%;animation-delay:0s"
+         width="19" height="19" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-    <svg class="deco-sparkle deco-sparkle--sm" style="top:40%;right:15%;animation-delay:-1s"
-         width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+    <svg class="deco-sparkle deco-sparkle--sm" style="top:42%;right:14%;animation-delay:-1.1s"
+         width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-    <svg class="deco-sparkle deco-sparkle--xs" style="top:75%;left:30%;animation-delay:-2s"
+    <svg class="deco-sparkle deco-sparkle--xs" style="top:76%;left:29%;animation-delay:-2.2s"
          width="8" height="8" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-    <svg class="deco-sparkle deco-sparkle--lg" style="top:55%;right:25%;animation-delay:-3s"
-         width="28" height="28" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+    <svg class="deco-sparkle deco-sparkle--lg" style="top:56%;right:24%;animation-delay:-3.3s"
+         width="26" height="26" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-    <svg class="deco-sparkle deco-sparkle--sm" style="top:30%;left:45%;animation-delay:-1.5s"
-         width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+    <svg class="deco-sparkle deco-sparkle--sm" style="top:31%;left:44%;animation-delay:-1.7s"
+         width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-    <svg class="deco-sparkle deco-sparkle--xs" style="top:88%;right:40%;animation-delay:-0.8s"
+    <svg class="deco-sparkle deco-sparkle--xs" style="top:89%;right:38%;animation-delay:-0.9s"
          width="8" height="8" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M8 0 C8 0 8.3 4 8 8 C7.7 4 8 0 8 0Z"      fill="currentColor"/>
-      <path d="M16 8 C16 8 12 7.7 8 8 C12 8.3 16 8 16 8Z" fill="currentColor"/>
-      <path d="M8 16 C8 16 7.7 12 8 8 C8.3 12 8 16 8 16Z" fill="currentColor"/>
-      <path d="M0 8 C0 8 4 8.3 8 8 C4 7.7 0 8 0 8Z"      fill="currentColor"/>
+      <path d="M8 0C8 0 8.3 4 8 8C7.7 4 8 0 8 0Z"        fill="currentColor"/>
+      <path d="M16 8C16 8 12 7.7 8 8C12 8.3 16 8 16 8Z"  fill="currentColor"/>
+      <path d="M8 16C8 16 7.7 12 8 8C8.3 12 8 16 8 16Z"  fill="currentColor"/>
+      <path d="M0 8C0 8 4 8.3 8 8C4 7.7 0 8 0 8Z"        fill="currentColor"/>
     </svg>
-  </div>
 
-  <!-- ─── Main Frame ─── -->
+  </div><!-- /bg-layer -->
+
+
+  <!-- ════════════════════════════════════════
+       SETTINGS MODAL (optional user API key)
+  ════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay"
+       role="dialog" aria-modal="true" aria-label="API 설정">
+    <div class="settings-panel">
+      <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
+
+      <h2 class="settings-title">API 설정</h2>
+      <p class="settings-desc">
+        Pastelette는 <strong>기본적으로 무료 AI</strong>로 동작합니다.
+        더 정교한 분석을 원하신다면 개인 API 키를 추가하세요.
+        키는 브라우저에만 저장되며 외부로 전송되지 않습니다.<br><br>
+        Gemini 무료 키 발급 →&nbsp;
+        <a href="https://aistudio.google.com/app/apikey"
+           target="_blank" rel="noopener">Google AI Studio</a>
+      </p>
+
+      <div class="settings-field">
+        <label class="settings-label" for="apiService">서비스</label>
+        <select class="settings-select" id="apiService">
+          <option value="gemini">Google Gemini (무료 · 권장)</option>
+          <option value="openai">OpenAI GPT-4o mini</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-label" for="apiKeyInput">API 키 (선택)</label>
+        <input class="settings-input" id="apiKeyInput" type="password"
+               placeholder="키를 입력하세요" autocomplete="off" spellcheck="false"/>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn-save"   id="btnSave">저장</button>
+        <button class="btn-cancel" id="btnCancel">취소</button>
+        <button class="btn-clear"  id="btnClear" title="저장된 키 삭제">삭제</button>
+      </div>
+    </div>
+  </div><!-- /modal -->
+
+
+  <!-- ════════════════════════════════════════
+       MAIN FRAME
+  ════════════════════════════════════════ -->
   <main class="main-frame" role="main">
-    <div class="corner-ornament corner-ornament--tl"></div>
-    <div class="corner-ornament corner-ornament--tr"></div>
-    <div class="corner-ornament corner-ornament--bl"></div>
-    <div class="corner-ornament corner-ornament--br"></div>
+    <!-- Corner ornaments -->
+    <div class="corner-ornament corner-ornament--tl" aria-hidden="true"></div>
+    <div class="corner-ornament corner-ornament--tr" aria-hidden="true"></div>
+    <div class="corner-ornament corner-ornament--bl" aria-hidden="true"></div>
+    <div class="corner-ornament corner-ornament--br" aria-hidden="true"></div>
 
+    <!-- ── Header ── -->
     <header class="site-header">
-      <h1 class="site-title">Word Palette</h1>
-      <p class="site-tagline">단어가 색채로 번역되는 순간</p>
+      <h1 class="site-title">Pastelette</h1>
+      <p class="site-tagline">every word carries color</p>
+      <span class="ai-badge ai-badge--free" id="aiBadge">AI 분석 · 무료</span>
+
+      <!-- Settings gear -->
+      <button class="settings-btn" id="settingsBtn"
+              aria-label="API 설정" title="선택: 개인 API 키 설정">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+             xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M7 1v1.5M7 11.5V13M13 7h-1.5M2.5 7H1
+                   M11.24 2.76l-1.06 1.06M3.82 10.18l-1.06 1.06
+                   M11.24 11.24l-1.06-1.06M3.82 3.82L2.76 2.76"
+                stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </header>
 
-    <section class="search-section">
-      <form class="search-form" id="searchForm">
+    <!-- ── Search ── -->
+    <section class="search-section" aria-label="단어 검색">
+      <form class="search-form" id="searchForm" role="search">
         <div class="search-wrapper">
           <div class="search-inner">
-            <input class="word-input" id="wordInput" type="text"
-                   placeholder="단어를 입력하세요 — forest, cozy, ocean..."
-                   autocomplete="off" spellcheck="false"/>
-            <button class="search-btn" type="submit" aria-label="색채 추천">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <input
+              class="word-input"
+              id="wordInput"
+              type="search"
+              placeholder="단어를 입력하세요 — forest, 그리움, nostalgia..."
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="색채를 번역할 단어"
+            />
+            <button class="search-btn" id="searchBtn" type="submit" aria-label="색채 추천">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
+                   xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <path d="M3 9H15M10 4L15 9L10 14"
                       stroke="currentColor" stroke-width="1"
                       stroke-linecap="round" stroke-linejoin="round"/>
@@ -617,353 +247,49 @@
           </div>
         </div>
       </form>
-      <div class="suggestion-tags" id="suggestionTags">
-        <button class="tag-pill" data-word="ocean">ocean</button>
-        <button class="tag-pill" data-word="forest">forest</button>
-        <button class="tag-pill" data-word="sunset">sunset</button>
-        <button class="tag-pill" data-word="cozy">cozy</button>
-        <button class="tag-pill" data-word="bloom">bloom</button>
-        <button class="tag-pill" data-word="winter">winter</button>
-        <button class="tag-pill" data-word="desert">desert</button>
-        <button class="tag-pill" data-word="midnight">midnight</button>
-        <button class="tag-pill" data-word="봄">봄</button>
-        <button class="tag-pill" data-word="가을">가을</button>
-        <button class="tag-pill" data-word="fog">fog</button>
-        <button class="tag-pill" data-word="cherry">cherry</button>
+
+      <div class="suggestion-tags" id="suggestionTags" role="list" aria-label="추천 단어">
+        <button class="tag-pill" data-word="forest"    role="listitem">forest</button>
+        <button class="tag-pill" data-word="ocean"     role="listitem">ocean</button>
+        <button class="tag-pill" data-word="sunset"    role="listitem">sunset</button>
+        <button class="tag-pill" data-word="그리움"    role="listitem">그리움</button>
+        <button class="tag-pill" data-word="봄"        role="listitem">봄</button>
+        <button class="tag-pill" data-word="winter"    role="listitem">winter</button>
+        <button class="tag-pill" data-word="cozy"      role="listitem">cozy</button>
+        <button class="tag-pill" data-word="마음"      role="listitem">마음</button>
+        <button class="tag-pill" data-word="midnight"  role="listitem">midnight</button>
+        <button class="tag-pill" data-word="가을"      role="listitem">가을</button>
+        <button class="tag-pill" data-word="lavender"  role="listitem">lavender</button>
+        <button class="tag-pill" data-word="rain"      role="listitem">rain</button>
       </div>
     </section>
 
-    <section class="result-section" id="resultSection" aria-live="polite">
+    <!-- ── Result ── -->
+    <section class="result-section" id="resultSection" aria-live="polite" aria-label="팔레트 결과">
       <div class="palette-card" id="paletteCard">
         <div class="empty-state">
-          <p class="empty-state__text">단어 하나가 색채 세계로 번역됩니다</p>
+          <svg class="empty-state__icon" width="32" height="32" viewBox="0 0 16 16"
+               fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 0C8 0 8.4 5 8 8C7.6 5 8 0 8 0Z"       fill="currentColor"/>
+            <path d="M16 8C16 8 11 7.6 8 8C11 8.4 16 8 16 8Z" fill="currentColor"/>
+            <path d="M8 16C8 16 7.6 11 8 8C8.4 11 8 16 8 16Z" fill="currentColor"/>
+            <path d="M0 8C0 8 5 8.4 8 8C5 7.6 0 8 0 8Z"       fill="currentColor"/>
+          </svg>
+          <p class="empty-state__text">
+            단어 하나가 색채 세계로 번역됩니다<br>
+            <small style="font-size:0.8em;letter-spacing:0.05em;">AI가 의미를 분석해 어울리는 색을 찾아드립니다</small>
+          </p>
         </div>
       </div>
     </section>
-  </main>
 
-  <script>
-    // ═══════════════════════════════════════════
-    // Palette Data — Curated
-    // ═══════════════════════════════════════════
-    const PALETTE_MAP = {
-      forest: [
-        { hex: '#2D5A27', name: 'Deep Forest',   nameKo: '깊은 숲'    },
-        { hex: '#5C8A52', name: 'Moss Green',    nameKo: '이끼 초록'  },
-        { hex: '#8FBF7A', name: 'Fern',          nameKo: '고사리'     },
-        { hex: '#C4DDB5', name: 'Morning Mist',  nameKo: '아침 안개'  },
-        { hex: '#E8F3E0', name: 'Pale Canopy',   nameKo: '연한 수관'  },
-      ],
-      ocean: [
-        { hex: '#1A3A5C', name: 'Deep Sea',      nameKo: '심해'       },
-        { hex: '#2E6E8E', name: 'Sea Blue',      nameKo: '바다 파랑'  },
-        { hex: '#5BA4C4', name: 'Wave',          nameKo: '파도'       },
-        { hex: '#A8D4E8', name: 'Seafoam',       nameKo: '해포말'     },
-        { hex: '#E0F0F8', name: 'Morning Sea',   nameKo: '새벽 바다'  },
-      ],
-      sunset: [
-        { hex: '#C05B2C', name: 'Ember',         nameKo: '잉걸불'     },
-        { hex: '#E88A4A', name: 'Golden Hour',   nameKo: '황금빛'     },
-        { hex: '#F2BA70', name: 'Amber',         nameKo: '호박'       },
-        { hex: '#F4D4A0', name: 'Dusk',          nameKo: '황혼'       },
-        { hex: '#FBE9CC', name: 'Evening Sky',   nameKo: '저녁 하늘'  },
-      ],
-      cozy: [
-        { hex: '#8B5A42', name: 'Warm Wood',     nameKo: '따뜻한 나무' },
-        { hex: '#C4956A', name: 'Caramel',       nameKo: '캐러멜'      },
-        { hex: '#E8C9A0', name: 'Cream',         nameKo: '크림'        },
-        { hex: '#F0E0C8', name: 'Linen',         nameKo: '린넨'        },
-        { hex: '#F8F0E4', name: 'Candlelight',   nameKo: '촛불빛'      },
-      ],
-      bloom: [
-        { hex: '#C06080', name: 'Rose Petal',    nameKo: '장미꽃잎'   },
-        { hex: '#D98FA8', name: 'Blush',         nameKo: '홍조'       },
-        { hex: '#EBB8CA', name: 'Petal',         nameKo: '꽃잎'       },
-        { hex: '#F5D8E4', name: 'Blossom',       nameKo: '꽃봉오리'   },
-        { hex: '#FAF0F4', name: 'First Bloom',   nameKo: '첫 개화'    },
-      ],
-      winter: [
-        { hex: '#2C3E6A', name: 'Frost Night',   nameKo: '서리 밤'    },
-        { hex: '#5E7BA8', name: 'Ice Blue',      nameKo: '아이스 블루' },
-        { hex: '#9BB8D4', name: 'Crystal',       nameKo: '크리스탈'   },
-        { hex: '#C8DDE8', name: 'Snow Mist',     nameKo: '눈 안개'    },
-        { hex: '#EEF4F8', name: 'Snowfield',     nameKo: '설원'       },
-      ],
-      desert: [
-        { hex: '#8B5A28', name: 'Desert Sand',   nameKo: '사막 모래'  },
-        { hex: '#C49060', name: 'Dune',          nameKo: '사구'       },
-        { hex: '#DEB882', name: 'Sandstone',     nameKo: '사암'       },
-        { hex: '#EDD5A8', name: 'Mirage',        nameKo: '신기루'     },
-        { hex: '#F8EDD8', name: 'Pale Dune',     nameKo: '연한 사구'  },
-      ],
-      midnight: [
-        { hex: '#0D1B2A', name: 'Midnight',      nameKo: '자정'       },
-        { hex: '#1B3A5C', name: 'Night Sky',     nameKo: '밤하늘'     },
-        { hex: '#2E5D8A', name: 'Dark Blue',     nameKo: '짙은 파랑'  },
-        { hex: '#4A7FA8', name: 'Twilight',      nameKo: '황혼'       },
-        { hex: '#7EACC8', name: 'Moonlight',     nameKo: '달빛'       },
-      ],
-      봄: [
-        { hex: '#5A8A3C', name: 'New Leaf',      nameKo: '새싹'       },
-        { hex: '#D4A0C0', name: 'Cherry Pink',   nameKo: '벚꽃 분홍'  },
-        { hex: '#C8E8A0', name: 'Spring Green',  nameKo: '봄 초록'    },
-        { hex: '#F0D8F0', name: 'Lilac',         nameKo: '라일락'     },
-        { hex: '#FAF0E8', name: 'Spring Dawn',   nameKo: '봄 여명'    },
-      ],
-      spring: [
-        { hex: '#5A8A3C', name: 'New Leaf',      nameKo: '새싹'       },
-        { hex: '#D4A0C0', name: 'Cherry Pink',   nameKo: '벚꽃 분홍'  },
-        { hex: '#C8E8A0', name: 'Spring Green',  nameKo: '봄 초록'    },
-        { hex: '#F0D8F0', name: 'Lilac',         nameKo: '라일락'     },
-        { hex: '#FAF0E8', name: 'Spring Dawn',   nameKo: '봄 여명'    },
-      ],
-      가을: [
-        { hex: '#B84A1C', name: 'Fallen Leaf',   nameKo: '낙엽'       },
-        { hex: '#D4782A', name: 'Maple',         nameKo: '단풍'       },
-        { hex: '#E8B050', name: 'Harvest',       nameKo: '수확'       },
-        { hex: '#C89060', name: 'Earth',         nameKo: '흙'         },
-        { hex: '#F0E0C0', name: 'Amber Mist',    nameKo: '호박 안개'  },
-      ],
-      autumn: [
-        { hex: '#B84A1C', name: 'Fallen Leaf',   nameKo: '낙엽'       },
-        { hex: '#D4782A', name: 'Maple',         nameKo: '단풍'       },
-        { hex: '#E8B050', name: 'Harvest',       nameKo: '수확'       },
-        { hex: '#C89060', name: 'Earth',         nameKo: '흙'         },
-        { hex: '#F0E0C0', name: 'Amber Mist',    nameKo: '호박 안개'  },
-      ],
-      lavender: [
-        { hex: '#6A5A8A', name: 'Deep Violet',   nameKo: '깊은 보라'  },
-        { hex: '#9080B8', name: 'Amethyst',      nameKo: '자수정'     },
-        { hex: '#B8A8D8', name: 'Lavender',      nameKo: '라벤더'     },
-        { hex: '#D8CCEA', name: 'Mist Violet',   nameKo: '안개 보라'  },
-        { hex: '#F0EDF8', name: 'Pale Bloom',    nameKo: '연한 꽃'    },
-      ],
-      rain: [
-        { hex: '#2A4060', name: 'Storm',         nameKo: '폭풍'       },
-        { hex: '#4A6A88', name: 'Rain Cloud',    nameKo: '빗구름'     },
-        { hex: '#7A9AB8', name: 'Drizzle',       nameKo: '이슬비'     },
-        { hex: '#B0C8D8', name: 'After Rain',    nameKo: '비 온 뒤'   },
-        { hex: '#E0ECF4', name: 'Mist',          nameKo: '안개'       },
-      ],
-      night: [
-        { hex: '#121820', name: 'Void',          nameKo: '어둠'       },
-        { hex: '#1E2E40', name: 'Deep Night',    nameKo: '깊은 밤'    },
-        { hex: '#3A4E68', name: 'Dusk',          nameKo: '황혼'       },
-        { hex: '#6880A0', name: 'Starlight',     nameKo: '별빛'       },
-        { hex: '#A8B8CC', name: 'Dawn',          nameKo: '여명'       },
-      ],
-      coffee: [
-        { hex: '#3C1F0A', name: 'Espresso',      nameKo: '에스프레소'  },
-        { hex: '#6A3D18', name: 'Dark Roast',    nameKo: '다크 로스트' },
-        { hex: '#A0602A', name: 'Latte',         nameKo: '라떼'        },
-        { hex: '#D4A870', name: 'Cream',         nameKo: '크림'        },
-        { hex: '#F4E8D4', name: 'Milk Foam',     nameKo: '밀크폼'      },
-      ],
-      cherry: [
-        { hex: '#8B1A2A', name: 'Deep Cherry',   nameKo: '체리'        },
-        { hex: '#C03050', name: 'Ruby',          nameKo: '루비'        },
-        { hex: '#E06080', name: 'Carnation',     nameKo: '카네이션'    },
-        { hex: '#F0A8B8', name: 'Blush Pink',    nameKo: '볼연지'      },
-        { hex: '#FAE0E8', name: 'Rose Mist',     nameKo: '장미 안개'   },
-      ],
-      sky: [
-        { hex: '#1A4A7A', name: 'Deep Sky',      nameKo: '깊은 하늘'  },
-        { hex: '#3A7AB0', name: 'Blue Sky',      nameKo: '하늘색'     },
-        { hex: '#78B4D8', name: 'Cloud',         nameKo: '구름'       },
-        { hex: '#B8D8EC', name: 'Pale Sky',      nameKo: '연한 하늘'  },
-        { hex: '#E8F4FA', name: 'Morning Sky',   nameKo: '아침 하늘'  },
-      ],
-      fog: [
-        { hex: '#6A7888', name: 'Gray Stone',    nameKo: '회색 돌'    },
-        { hex: '#90A0B0', name: 'Fog',           nameKo: '안개'       },
-        { hex: '#B8C8D4', name: 'Mist',          nameKo: '물안개'     },
-        { hex: '#D8E4EC', name: 'Haze',          nameKo: '아지랑이'   },
-        { hex: '#F0F4F8', name: 'White Mist',    nameKo: '흰 안개'    },
-      ],
-      smoke: [
-        { hex: '#3A3C40', name: 'Charcoal',      nameKo: '숯'         },
-        { hex: '#6A6C70', name: 'Ash',           nameKo: '재'         },
-        { hex: '#A0A4A8', name: 'Smoke',         nameKo: '연기'       },
-        { hex: '#C8CCD0', name: 'Silver',        nameKo: '은빛'       },
-        { hex: '#EEF0F2', name: 'Pale Ash',      nameKo: '연한 재'    },
-      ],
-      마음: [
-        { hex: '#6A5888', name: 'Calm Violet',   nameKo: '고요한 보라' },
-        { hex: '#9880B0', name: 'Soft Mauve',    nameKo: '부드러운 자주' },
-        { hex: '#C4B0D8', name: 'Gentle Haze',   nameKo: '온화한 안개' },
-        { hex: '#E0D4EC', name: 'Inner Peace',   nameKo: '내면의 평화' },
-        { hex: '#F5F0FA', name: 'Stillness',     nameKo: '고요함'      },
-      ],
-    };
+  </main><!-- /main-frame -->
 
-    // ═══════════════════════════════════════════
-    // Color Generation — Unknown Words
-    // ═══════════════════════════════════════════
-    function hashWord(word) {
-      let hash = 5381;
-      for (let i = 0; i < word.length; i++) {
-        hash = ((hash << 5) + hash) + word.charCodeAt(i);
-        hash |= 0;
-      }
-      return Math.abs(hash);
-    }
-
-    function hslToHex(h, s, l) {
-      h = ((h % 360) + 360) % 360;
-      s /= 100; l /= 100;
-      const a = s * Math.min(l, 1 - l);
-      const f = n => {
-        const k = (n + h / 30) % 12;
-        const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-        return Math.round(255 * c).toString(16).padStart(2, '0');
-      };
-      return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
-    }
-
-    const HUE_NAMES = [
-      { min: 0,   max: 15,  en: 'Red',    ko: '빨강' },
-      { min: 15,  max: 45,  en: 'Orange', ko: '주황' },
-      { min: 45,  max: 70,  en: 'Golden', ko: '황금' },
-      { min: 70,  max: 155, en: 'Green',  ko: '초록' },
-      { min: 155, max: 195, en: 'Teal',   ko: '청록' },
-      { min: 195, max: 255, en: 'Blue',   ko: '파랑' },
-      { min: 255, max: 290, en: 'Violet', ko: '보라' },
-      { min: 290, max: 335, en: 'Pink',   ko: '핑크' },
-      { min: 335, max: 360, en: 'Rose',   ko: '장미' },
-    ];
-
-    const SHADE = [
-      { en: 'Deep',    ko: '깊은'     },
-      { en: 'Dark',    ko: '짙은'     },
-      { en: 'Pure',    ko: '맑은'     },
-      { en: 'Soft',    ko: '부드러운' },
-      { en: 'Pale',    ko: '연한'     },
-    ];
-
-    function getHueName(hue) {
-      const h = ((hue % 360) + 360) % 360;
-      for (const n of HUE_NAMES) {
-        if (h >= n.min && h < n.max) return { en: n.en, ko: n.ko };
-      }
-      return { en: 'Rose', ko: '장미' };
-    }
-
-    function generatePalette(word) {
-      const hash   = hashWord(word);
-      const baseH  = hash % 360;
-      const baseS  = 28 + (hash % 38);      // 28–65%
-      const shifts = [0, 6, -5, 10, -8];    // hue micro-shifts per swatch
-      const lights = [22, 36, 50, 66, 85];  // lightness steps
-
-      const hueInfo = getHueName(baseH);
-
-      return lights.map((l, i) => {
-        const h = baseH + shifts[i];
-        const s = Math.max(18, baseS - i * 5);
-        return {
-          hex:    hslToHex(h, s, l),
-          name:   `${SHADE[i].en} ${hueInfo.en}`,
-          nameKo: `${SHADE[i].ko} ${hueInfo.ko}`,
-        };
-      });
-    }
-
-    // ═══════════════════════════════════════════
-    // Rendering
-    // ═══════════════════════════════════════════
-    function updateWatermark(word) {
-      const el = document.getElementById('bgWatermark');
-      el.style.opacity = '0';
-      setTimeout(() => {
-        el.textContent = (word || 'PALETTE').toUpperCase();
-        el.style.opacity = '1';
-      }, 300);
-    }
-
-    function renderPalette(keyword, colors) {
-      updateWatermark(keyword);
-
-      const swatches = colors.map((c, i) => `
-        <div class="color-swatch" style="--swatch-color:${c.hex};animation-delay:${(i + 1) * 0.1}s">
-          <div class="swatch-bar"></div>
-          <div class="swatch-info">
-            <span class="swatch-name">${c.name}</span>
-            <span class="swatch-name-ko">${c.nameKo}</span>
-            <span class="hex-code" title="클릭하여 복사" onclick="copyHex(this,'${c.hex}')">${c.hex}</span>
-          </div>
-        </div>
-      `).join('');
-
-      const card = document.getElementById('paletteCard');
-      // Re-trigger animation
-      card.style.animation = 'none';
-      void card.offsetHeight;
-      card.style.animation = 'card-reveal 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards';
-
-      card.innerHTML = `
-        <div class="palette-card__header">
-          <span class="palette-keyword">${keyword}</span>
-          <span class="palette-subtitle">${colors.length}가지 색채 팔레트</span>
-        </div>
-        <div class="color-swatches">${swatches}</div>
-      `;
-
-      document.getElementById('resultSection').classList.add('visible');
-    }
-
-    function copyHex(el, hex) {
-      const doFeedback = () => {
-        el.classList.add('copied');
-        setTimeout(() => el.classList.remove('copied'), 1500);
-      };
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(hex).then(doFeedback).catch(() => {
-          fallbackCopy(hex); doFeedback();
-        });
-      } else {
-        fallbackCopy(hex); doFeedback();
-      }
-    }
-
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }
-
-    function search(word) {
-      const trimmed = word.trim();
-      if (!trimmed) return;
-      const key    = trimmed.toLowerCase();
-      const colors = PALETTE_MAP[key] || PALETTE_MAP[trimmed] || generatePalette(trimmed);
-      renderPalette(trimmed, colors);
-      document.getElementById('wordInput').value = trimmed;
-    }
-
-    // ═══════════════════════════════════════════
-    // Events
-    // ═══════════════════════════════════════════
-    document.getElementById('searchForm').addEventListener('submit', e => {
-      e.preventDefault();
-      search(document.getElementById('wordInput').value);
-    });
-
-    document.getElementById('suggestionTags').addEventListener('click', e => {
-      const pill = e.target.closest('.tag-pill');
-      if (!pill) return;
-      search(pill.dataset.word);
-    });
-
-    document.getElementById('wordInput').addEventListener('input', e => {
-      updateWatermark(e.target.value);
-    });
-
-    // Auto-focus
-    document.getElementById('wordInput').focus();
-  </script>
+  <!-- Scripts — order matters -->
+  <script src="js/color-utils.js"></script>
+  <script src="js/palette-data.js"></script>
+  <script src="js/ai-service.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

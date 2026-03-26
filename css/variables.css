@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════
+   Pastelette — CSS Custom Properties
+   ═══════════════════════════════════════════ */
+:root {
+  /* Background */
+  --bg-gradient: linear-gradient(
+    135deg,
+    #FDFCF8 0%,
+    #F0EDF8 30%,
+    #E8EEF8 60%,
+    #DDE8F5 100%
+  );
+  --bg-frosted:        rgba(255, 255, 255, 0.45);
+  --bg-frosted-border: rgba(255, 255, 255, 0.70);
+
+  /* Text */
+  --text-primary:   #7B78A8;
+  --text-secondary: #9D9BBF;
+  --text-muted:     #B8B5D0;
+  --text-watermark: rgba(180, 176, 210, 0.15);
+  --text-label:     #6B6898;
+
+  /* Borders */
+  --border-frame:        rgba(180, 175, 215, 0.50);
+  --border-frame-inner:  rgba(200, 196, 230, 0.28);
+  --border-card:         rgba(210, 206, 235, 0.40);
+  --border-input:        rgba(180, 175, 215, 0.60);
+  --border-input-focus:  rgba(150, 145, 200, 0.80);
+
+  /* Decorative */
+  --deco-snowflake:    rgba(160, 155, 205, 0.50);
+  --deco-sparkle:      rgba(170, 165, 215, 0.60);
+  --deco-ribbon-blue:  rgba(140, 170, 220, 0.50);
+  --deco-ribbon-pink:  rgba(230, 160, 160, 0.40);
+  --deco-dot:          rgba(175, 170, 215, 0.22);
+
+  /* Accent */
+  --accent-primary: #A8A4D4;
+  --accent-hover:   #8F8BC0;
+  --accent-glow:    rgba(168, 164, 212, 0.28);
+
+  /* Typography — sizes */
+  --fs-display:   clamp(2.8rem, 7vw, 5rem);
+  --fs-watermark: clamp(6rem, 18vw, 16rem);
+  --fs-heading:   clamp(1.1rem, 2.2vw, 1.5rem);
+  --fs-body:      0.9rem;
+  --fs-label:     0.72rem;
+  --fs-hex:       0.65rem;
+  --fs-input:     1rem;
+  --fs-tag:       0.73rem;
+
+  /* Typography — spacing */
+  --ls-display: 0.28em;
+  --ls-heading: 0.15em;
+  --ls-label:   0.12em;
+  --ls-hex:     0.06em;
+  --ls-ui:      0.05em;
+
+  /* Radius */
+  --radius-card:  16px;
+  --radius-pill:  40px;
+  --radius-btn:   8px;
+
+  /* Transitions */
+  --transition-base:  0.25s ease;
+  --transition-slow:  0.45s ease;
+  --transition-spring: 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+}

@@ -1,0 +1,51 @@
+/* ═══════════════════════════════════════════
+   Pastelette — Reset & Base
+   ═══════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a { color: inherit; }
+
+img, svg { display: block; }
+
+/* ─── Page Root ─── */
+body.page-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 72% 18%, rgba(200, 195, 240, 0.22) 0%, transparent 58%),
+    radial-gradient(ellipse at 18% 82%, rgba(200, 220, 245, 0.18) 0%, transparent 52%),
+    var(--bg-gradient);
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-x: hidden;
+  animation: page-fade-in 1.4s ease forwards;
+}
