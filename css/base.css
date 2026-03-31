@@ -38,8 +38,8 @@ img, svg { display: block; }
 body.page-root {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 72% 18%, rgba(200, 195, 240, 0.22) 0%, transparent 58%),
-    radial-gradient(ellipse at 18% 82%, rgba(200, 220, 245, 0.18) 0%, transparent 52%),
+    radial-gradient(ellipse at 70% 20%, rgba(200, 195, 240, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(200, 220, 245, 0.20) 0%, transparent 55%),
     var(--bg-gradient);
   background-attachment: fixed;
   display: flex;
@@ -47,5 +47,5 @@ body.page-root {
   justify-content: center;
   padding: 24px;
   overflow-x: hidden;
-  animation: page-fade-in 1.4s ease forwards;
+  animation: page-fade-in 1.2s ease forwards;
 }

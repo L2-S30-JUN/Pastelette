@@ -7,30 +7,30 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 780px;
-  padding: 52px 52px 60px;
+  max-width: 760px;
+  padding: 48px 48px 56px;
   display: flex;
   flex-direction: column;
-  gap: 44px;
+  gap: 40px;
   border: 1px solid var(--border-frame);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 /* inner double line */
 .main-frame::before {
   content: '';
   position: absolute;
-  inset: 7px;
+  inset: 6px;
   border: 0.5px solid var(--border-frame-inner);
-  border-radius: 2px;
+  border-radius: 1px;
   pointer-events: none;
 }
 
 /* ─── Corner Ornaments ─── */
 .corner-ornament {
   position: absolute;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
 }
 .corner-ornament::before,
@@ -67,12 +67,12 @@
 }
 
 .site-tagline {
-  font-family: 'Jost', sans-serif;
+  font-family: 'Noto Serif KR', serif;
   font-size: var(--fs-label);
-  font-weight: 200;
+  font-weight: 300;
   color: var(--text-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 8px;
 }
 
 /* ─── Settings button (top-right of header) ─── */
@@ -140,6 +140,6 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 600px) {
-  .main-frame { padding: 30px 22px 38px; gap: 30px; }
+  .main-frame { padding: 28px 20px 36px; gap: 28px; }
   .site-title { font-size: clamp(2rem, 10vw, 3rem); }
 }
