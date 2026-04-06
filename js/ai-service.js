@@ -18,7 +18,6 @@ const SESSION_CACHE_KEY   = 'pst_cache';
 const GEMINI_MODELS = [
   'gemini-2.0-flash-lite',
   'gemini-2.0-flash',
-  'gemini-1.5-flash',
 ];
 
 // ─── Rate Limiter ──────────────────────────
@@ -109,63 +108,83 @@ function normalizeColor(c) {
 }
 
 // ═════════════════════════════════════════════
-//  Pollinations.ai — GET endpoint (no CORS preflight)
-//
-//  Models to try in order: 'mistral' is fastest,
-//  'openai' is best quality but often overloaded (524).
+//  Pollinations.ai
+//  1) POST to /openai (OpenAI-compatible endpoint)
+//  2) GET  to /{prompt}?json=true (simple endpoint fallback)
 // ═════════════════════════════════════════════
-const POLLINATIONS_MODELS = ['mistral', 'openai-large', 'openai'];
-
 async function callPollinationsAI(word) {
-  const system = 'You are a color palette designer. Return ONLY valid JSON, no markdown.';
+  // --- Attempt 1: POST /openai (correct endpoint) ---
+  try {
+    console.log('[Pastelette] Trying Pollinations POST /openai...');
+    await waitForCooldown();
 
-  const prompt =
-    `Word: "${word}". Create a 5-color palette. ` +
-    `Vary saturation: dark(S25%,L20%), vivid(S70%,L45%), muted(S35%,L60%), soft(S15%,L78%), pale(S7%,L91%). ` +
-    `Return JSON: {"description":"one sentence","colors":[{"hex":"#RRGGBB","name":"English","nameKo":"한국어"},..5]}`;
+    const res = await withTimeout(
+      fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'openai',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a color palette designer. Return ONLY valid JSON, no markdown.',
+            },
+            {
+              role: 'user',
+              content:
+                `Word: "${word}". Create a 5-color palette. ` +
+                `Vary saturation: dark(S25%,L20%), vivid(S70%,L45%), muted(S35%,L60%), soft(S15%,L78%), pale(S7%,L91%). ` +
+                `Return JSON: {"description":"one sentence","colors":[{"hex":"#RRGGBB","name":"English","nameKo":"한국어"},..5]}`,
+            },
+          ],
+          seed: ColorUtils.hashWord(word) % 9999,
+          jsonMode: true,
+        }),
+      }),
+      30000
+    );
 
-  const seed = ColorUtils.hashWord(word) % 9999;
-  let lastErr = null;
+    console.log('[Pastelette] Pollinations POST response:', res.status);
+    if (!res.ok) throw new Error(`POST HTTP ${res.status}`);
 
-  for (const model of POLLINATIONS_MODELS) {
-    console.log(`[Pastelette] Trying Pollinations.ai (${model})...`);
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content || JSON.stringify(data);
+    console.log('[Pastelette] Pollinations POST raw (first 300):', text.slice(0, 300));
+    const result = parseAIResponse(text);
+    console.log('[Pastelette] ✓ Pollinations POST succeeded');
+    return result;
 
-    const url =
-      `https://text.pollinations.ai/${encodeURIComponent(prompt)}` +
-      `?model=${model}` +
-      `&system=${encodeURIComponent(system)}` +
-      `&seed=${seed}` +
-      `&private=true` +
-      `&jsonMode=true`;
-
-    try {
-      await waitForCooldown();
-      const res = await withTimeout(fetch(url), 30000);
-
-      console.log(`[Pastelette] Pollinations ${model} response:`, res.status);
-
-      if (res.status >= 500) {
-        console.warn(`[Pastelette] Pollinations ${model}: server error ${res.status}, trying next...`);
-        lastErr = new Error(`Pollinations ${model} HTTP ${res.status}`);
-        continue;
-      }
-      if (!res.ok) throw new Error(`Pollinations HTTP ${res.status}`);
-
-      const text = await res.text();
-      console.log(`[Pastelette] Pollinations ${model} raw (first 300):`, text.slice(0, 300));
-      const result = parseAIResponse(text);
-      console.log(`[Pastelette] ✓ Pollinations ${model} succeeded`);
-      return result;
-
-    } catch (err) {
-      lastErr = err;
-      console.warn(`[Pastelette] Pollinations ${model} failed:`, err.message);
-      if (err.message === 'timeout') continue; // try next model
-      throw err; // non-timeout → stop
-    }
+  } catch (err) {
+    console.warn('[Pastelette] Pollinations POST failed:', err.message);
   }
 
-  throw lastErr || new Error('All Pollinations models failed');
+  // --- Attempt 2: GET /{prompt} (simple, no CORS preflight) ---
+  try {
+    console.log('[Pastelette] Trying Pollinations GET...');
+    await waitForCooldown();
+
+    const prompt = `Create a 5-color palette for the word "${word}". Return only JSON: {"description":"sentence","colors":[{"hex":"#RRGGBB","name":"English","nameKo":"Korean"},{"hex":"#RRGGBB","name":"English","nameKo":"Korean"},{"hex":"#RRGGBB","name":"English","nameKo":"Korean"},{"hex":"#RRGGBB","name":"English","nameKo":"Korean"},{"hex":"#RRGGBB","name":"English","nameKo":"Korean"}]}`;
+    const url =
+      `https://text.pollinations.ai/${encodeURIComponent(prompt)}` +
+      `?seed=${ColorUtils.hashWord(word) % 9999}` +
+      `&json=true` +
+      `&model=openai`;
+
+    const res = await withTimeout(fetch(url), 30000);
+
+    console.log('[Pastelette] Pollinations GET response:', res.status);
+    if (!res.ok) throw new Error(`GET HTTP ${res.status}`);
+
+    const text = await res.text();
+    console.log('[Pastelette] Pollinations GET raw (first 300):', text.slice(0, 300));
+    const result = parseAIResponse(text);
+    console.log('[Pastelette] ✓ Pollinations GET succeeded');
+    return result;
+
+  } catch (err) {
+    console.warn('[Pastelette] Pollinations GET failed:', err.message);
+    throw new Error(`Pollinations failed: ${err.message}`);
+  }
 }
 
 // ═════════════════════════════════════════════
